@@ -16,7 +16,7 @@ class Beacon {
   private lateinit var context: Context
   private var beaconTransmitter: BeaconTransmitter? = null
   private var advertiseCallback: ((Boolean) -> Unit)? = null
-
+  private var beacon: Beacon? = null
   fun init(context: Context) {
     this.context = context
   }
@@ -29,14 +29,24 @@ class Beacon {
       beaconTransmitter = BeaconTransmitter(context, beaconParser)
     }
 
-    val beacon = Beacon.Builder()
-        .setId1(beaconData.uuid)
-        .setId2(beaconData.majorId.toString())
-        .setId3(beaconData.minorId.toString())
-        .setTxPower(beaconData.transmissionPower ?: -59)
-        .setDataFields(Arrays.asList(0L))
-        .setManufacturer(beaconData.manufacturerId ?: RADIUS_NETWORK_MANUFACTURER)
-        .build()
+    if(beaconData.layout == BeaconParser.ALTBEACON_LAYOUT) {
+      this.beacon = Beacon.Builder()
+              .setId1(beaconData.uuid)
+              .setId2(beaconData.majorId.toString())
+              .setId3(beaconData.minorId.toString())
+              .setTxPower(beaconData.transmissionPower ?: -59)
+              .setDataFields(Arrays.asList(0L))
+              .setManufacturer(beaconData.manufacturerId ?: RADIUS_NETWORK_MANUFACTURER)
+              .build()
+    }else{
+      this.beacon = Beacon.Builder()
+              .setId1(beaconData.uuid)
+              .setId2(beaconData.majorId.toString())
+              .setTxPower(beaconData.transmissionPower ?: -59)
+              .setDataFields(Arrays.asList(0L))
+              .setManufacturer(beaconData.manufacturerId ?: RADIUS_NETWORK_MANUFACTURER)
+              .build()
+    }
 
 
     beaconTransmitter?.startAdvertising(beacon, object : AdvertiseCallback() {
